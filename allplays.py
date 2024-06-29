@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import os
 import logging
 import glob
+import pdb
 
 
 def labelGame(dataframe):
@@ -19,6 +20,12 @@ def labelGame(dataframe):
     dataframe["teams_in_game"] = teams
     print(dataframe.head())
     return dataframe
+
+def editCsv(dataframe):
+    new_dataframe = dataframe[["Time", "Team", "Cap", "Cap Number", "Player Name", "Action", "teams_in_game"]]
+    new_dataframe = new_dataframe.rename(columns={'Cap': "cap_number", "Cap Number": "player_name", "Player Name": "Action", "Action": "score_result"})
+    print(new_dataframe.head())
+    return new_dataframe
 
 def combineCsv(path):
     csv_files = glob.glob(os.path.join(path, '*.csv'))
@@ -39,8 +46,8 @@ def main():
     for index,url in enumerate(lines):
 
         # # Set up WebDriver
-        driver = webdriver.Chrome()  # or use webdriver.Firefox() for Firefox
- 
+        #driver = webdriver.Chrome()  # or use webdriver.Firefox() for Firefox
+        driver = webdriver.Firefox() # use firefox for my windows setup
         print(url)
         driver.get(url)
 
@@ -74,7 +81,8 @@ def main():
 
         # Concatenate all data into a single DataFrame
         web_df = pd.concat(all_data, ignore_index=True)
-        final_df = labelGame(web_df) # add the teams as a column in the csv
+        team_df = labelGame(web_df) # add the teams as a column in the csv
+        final_df = editCsv(team_df)
 
         # Export to CSV
         final_df.to_csv(f'data_{index}.csv', index=False)
